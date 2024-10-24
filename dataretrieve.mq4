@@ -93,7 +93,6 @@ void SendAccountData()
 // Prepare data to send
    string postData = "name=" + name +
                      "&account_id=" + IntegerToString(account_id)+
-                     "&session_id=" + sessionID +
                      "&profit=" + DoubleToString(profit, 2) +
                      "&daily=" + DoubleToString(dailyProfit, 2) +
                      "&monthly=" + DoubleToString(monthlyProfit, 2) +

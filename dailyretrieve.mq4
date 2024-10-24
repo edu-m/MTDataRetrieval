@@ -72,10 +72,7 @@ void CollectAndSendHistoricalData()
    int totalDays = (int)((endDate - startDate) / 86400) + 1;
 
 // Build JSON data
-   string jsonData = "{";
-   jsonData += "\"error\": false,";
-   jsonData += "\"message\": \"\",";
-   jsonData += "\"dataDaily\": [";
+   string jsonData = "[";
 
    for(int i = 0; i < totalDays; i++)
      {
@@ -84,7 +81,7 @@ void CollectAndSendHistoricalData()
 
       // Date in "MM/DD/YYYY" format
       string dateStr = TimeToString(dayStart, TIME_DATE);
-      string dateFormatted = StringSubstr(dateStr, 5, 2) + "/" + StringSubstr(dateStr, 8, 2) + "/" + StringSubstr(dateStr, 0, 4);
+      string dateFormatted = StringSubstr(dateStr, 5, 2) + "\/" + StringSubstr(dateStr, 8, 2) + "\/" + StringSubstr(dateStr, 0, 4);
 
       // Balance at the end of the day
       double balance = GetBalanceAtDate(dayEnd);
@@ -156,6 +153,7 @@ void CollectAndSendHistoricalData()
    jsonData += "}";
 
 // Send data via WebRequest
+Print(jsonData);
    SendData(jsonData);
   }
 
@@ -251,13 +249,12 @@ void SendData(string jsonData)
   {
 // Prepare headers
    string headers = "API-Key: " + apiKey + "\r\n" +
-                    "Content-Type: application/json\r\n";
+                    "Content-Type: application/x-www-form-urlencoded\r\n";
 
 // Convert jsonData to uchar array
 
    long account_id = AccountInfoInteger(ACCOUNT_LOGIN);
    string postData = "account_id=" + IntegerToString(account_id)+
-                     "&session_id=" + "MT4" +
                      "&performance" + jsonData;
    uchar postDataArr[];
    StringToCharArray(postData, postDataArr);
