@@ -12,7 +12,7 @@
 
 // Global variables
 string apiKey = "abc";       // Replace with your actual API key
-string url = "https://amicobot.it/receive-daily"; // Replace with your actual endpoint URL
+string url = "https://test.local/receive-daily"; // Replace with your actual endpoint URL
 double initialBalance;
 double initialEquity;
 datetime firstTradeTime;
@@ -81,7 +81,7 @@ void CollectAndSendHistoricalData()
 
       // Date in "MM/DD/YYYY" format
       string dateStr = TimeToString(dayStart, TIME_DATE);
-      string dateFormatted = StringSubstr(dateStr, 5, 2) + "\/" + StringSubstr(dateStr, 8, 2) + "\/" + StringSubstr(dateStr, 0, 4);
+      string dateFormatted = StringSubstr(dateStr, 5, 2) + "/" + StringSubstr(dateStr, 8, 2) + "/" + StringSubstr(dateStr, 0, 4);
 
       // Balance at the end of the day
       double balance = GetBalanceAtDate(dayEnd);
@@ -132,28 +132,31 @@ void CollectAndSendHistoricalData()
       // Build JSON object for the day
       string jsonObject = "{";
       jsonObject += "\"date\": \"" + dateFormatted + "\",";
-      jsonObject += "\"balance\": " + DoubleToString(balance, 2) + ",";
-      jsonObject += "\"pips\": " + DoubleToString(pipsDay, 2) + ",";
-      jsonObject += "\"lots\": " + DoubleToString(lotsDay, 2) + ",";
-      jsonObject += "\"floatingPL\": " + DoubleToString(floatingPL, 2) + ",";
-      jsonObject += "\"profit\": " + DoubleToString(profitDay, 4) + ",";
-      jsonObject += "\"growthEquity\": " + DoubleToString(growthEquity, 2) + ",";
-      jsonObject += "\"floatingPips\": " + DoubleToString(floatingPips, 2);
+      jsonObject += "\"balance\": \"" + DoubleToString(balance, 2) + "\",";
+      jsonObject += "\"pips\": \"" + DoubleToString(pipsDay, 2) + "\",";
+      jsonObject += "\"lots\": \"" + DoubleToString(lotsDay, 2) + "\",";
+      jsonObject += "\"floatingPL\": \"" + DoubleToString(floatingPL, 2) + "\",";
+      jsonObject += "\"profit\": \"" + DoubleToString(profitDay, 4) + "\",";
+      jsonObject += "\"growthEquity\": \"" + DoubleToString(growthEquity, 2) + "\",";
+      jsonObject += "\"floatingPips\": \"" + DoubleToString(floatingPips, 2)+"\"";
       jsonObject += "}";
 
       // Append to jsonData
       jsonData += jsonObject;
 
       // Add comma if not last element
-      if(i < totalDays - 1)
+      if(i < totalDays -1 )
          jsonData += ",";
      }
 
    jsonData += "]";
-   jsonData += "}";
-
+   int file_handle=FileOpen(".//data.txt",FILE_WRITE|FILE_TXT);
+   if(file_handle == INVALID_HANDLE)
+      Print("invalid handle");
+   else
+      Print(FileWriteString(file_handle,jsonData));
 // Send data via WebRequest
-Print(jsonData);
+   Print(StringLen(jsonData));
    SendData(jsonData);
   }
 
@@ -229,7 +232,7 @@ double CalculateOrderPips(int ticket)
    double digits = MarketInfo(symbol, MODE_DIGITS);
    if(digits == 3 || digits == 5)
       pointSize *= 10;
-   Print(DoubleToStr(pointSize));
+// Print(DoubleToStr(pointSize));
    if(orderType == OP_BUY)
      {
       return (OrderClosePrice() - OrderOpenPrice()) / pointSize;
@@ -250,16 +253,16 @@ void SendData(string jsonData)
 // Prepare headers
    string headers = "API-Key: " + apiKey + "\r\n" +
                     "Content-Type: application/x-www-form-urlencoded\r\n";
-
+//Print("outgoing data: "+jsonData);
 // Convert jsonData to uchar array
 
    long account_id = AccountInfoInteger(ACCOUNT_LOGIN);
    string postData = "account_id=" + IntegerToString(account_id)+
-                     "&performance" + jsonData;
+                     "&performance=" + jsonData;
    uchar postDataArr[];
    StringToCharArray(postData, postDataArr);
    ResetLastError();
-
+//Print("array data "+CharArrayToString(postDataArr));
 // Send WebRequest
    uchar result[];
    string resultHeaders;

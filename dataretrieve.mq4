@@ -12,7 +12,7 @@
 datetime startTime;          // Time when the EA starts running
 string sessionID;            // Session ID for the EA instance
 input string apiKey = "abc";
-const string url = "https://amicobot.it/receive-data"; // Your WordPress endpoint
+const string url = "https://test.local/receive-data"; // Your WordPress endpoint
 input string name = "test";
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -21,7 +21,6 @@ int OnInit()
   {
 // Initialize variables
    startTime = TimeCurrent();
-   sessionID = GetSessionID();
 
 // Check if URL is allowed
    if(!IsUrlAllowed(url))
@@ -41,39 +40,39 @@ void OnDeinit(const int reason)
   {
 // Perform any cleanup if necessary
   }
-  
- /* 
+
+/*
 bool test = true;
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 void OnTick()
+ {
+  static datetime lastSendTime = 0;
+  datetime currentTime = TimeCurrent();
+
+  if(test)
+    {
+     SendAccountData(); // fire the send function once and then sleep indefintely
+     test=false;
+    }
+
+  // Send data every 60 seconds
+  if(currentTime - lastSendTime >= 60)
   {
-   static datetime lastSendTime = 0;
-   datetime currentTime = TimeCurrent();
 
-   if(test)
-     {
-      SendAccountData(); // fire the send function once and then sleep indefintely
-      test=false;
-     }
+     lastSendTime = currentTime;
 
-   // Send data every 60 seconds
-   if(currentTime - lastSendTime >= 60)
-   {
+  }
 
-      lastSendTime = currentTime;
-
-   }
-
-  }*/
+ }*/
 
 //+------------------------------------------------------------------+
 //| Function to send account data                                    |
 //+------------------------------------------------------------------+
 void SendAccountData()
   {
-  Print("Attempting to send");
+   Print("Attempting to send");
    if(name == "")
      {
       Alert("No name has been specified. Aborting");
@@ -86,19 +85,19 @@ void SendAccountData()
 // Calculate daily and monthly profit
    double dailyProfit = CalculateProfitForPeriod(PERIOD_D1);
    double monthlyProfit = CalculateProfitForPeriod(PERIOD_MN1);
-   int running_days = GetRunningDays();
+   ulong running_days = GetRunningDays();
    double gain = CalculateGain();
    double win_rate = CalculateWinRate();
 
 // Prepare data to send
    string postData = "name=" + name +
-                     "&account_id=" + IntegerToString(account_id)+
-                     "&profit=" + DoubleToString(profit, 2) +
-                     "&daily=" + DoubleToString(dailyProfit, 2) +
-                     "&monthly=" + DoubleToString(monthlyProfit, 2) +
-                     "&running_days=" + IntegerToString(running_days)+
-                     "&gain=" + DoubleToString(gain, 2) +
-                     "&win_rate=" + DoubleToString(win_rate, 2);
+                     "&account_id=" +IntegerToString(account_id)+
+                     "&profit=" +DoubleToString(profit, 2)+
+                     "&daily=" +DoubleToString(dailyProfit, 2)+
+                     "&monthly=" +DoubleToString(monthlyProfit, 2)+
+                     "&running_days=" +IntegerToString(running_days)+
+                     "&gain=" +DoubleToString(gain, 2)+
+                     "&win_rate=" +DoubleToString(win_rate, 2) ;
 
 // Include API key in headers
    const string headers = "API-Key: " + urlencode(apiKey) + "\r\n" +
@@ -131,14 +130,6 @@ void SendAccountData()
   }
 
 //+------------------------------------------------------------------+
-//| Function to generate or retrieve a session ID                    |
-//+------------------------------------------------------------------+
-string GetSessionID()
-  {
-   return("MT4");
-  }
-
-//+------------------------------------------------------------------+
 //| Function to calculate profit for a specific period               |
 //+------------------------------------------------------------------+
 double CalculateProfitForPeriod(int period)
@@ -165,10 +156,29 @@ double CalculateProfitForPeriod(int period)
 //+------------------------------------------------------------------+
 //| Function to calculate the number of running days                 |
 //+------------------------------------------------------------------+
-int GetRunningDays()
+ulong GetRunningDays()
   {
-   int days = (int)((TimeCurrent() - startTime) / 86400);
-   return(days);
+    return (ulong)(TimeCurrent()-GetFirstTradeTime())/(PERIOD_D1*60);
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+datetime GetFirstTradeTime()
+  {
+   int totalHistory = OrdersHistoryTotal();
+   datetime firstTime = 0;
+
+   for(int i = 0; i < totalHistory; i++)
+     {
+      if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY))
+        {
+         datetime openTime = OrderOpenTime();
+         if(firstTime == 0 || openTime < firstTime)
+            firstTime = openTime;
+        }
+     }
+   return firstTime;
   }
 
 //+------------------------------------------------------------------+
@@ -258,3 +268,4 @@ string urlencode(string s)
   }
 //+------------------------------------------------------------------+
 
+//+------------------------------------------------------------------+
