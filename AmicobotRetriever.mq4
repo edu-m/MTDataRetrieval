@@ -11,10 +11,10 @@
 #define OP_CREDIT 7
 // Global variables
 string sessionID;            // Session ID for the EA instance
-input string apiKey = "8cfa75afd3f00a42eb4c1520a5c5c11b0f373cd8";
+input string apiKey = ""; // Your API Key
 const string dataUrl = "https://amicobot.it/receive-data"; // Your WordPress endpoint
 const string dailyUrl = "https://amicobot.it/receive-daily"; // Your WordPress endpoint
-input string name = "test";
+input string name = "test"; // Name of your account
 
 
 
