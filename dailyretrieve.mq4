@@ -11,7 +11,7 @@
 #define OP_BALANCE 6
 
 // Global variables
-string apiKey = "abc";       // Replace with your actual API key
+input string apiKey = "8cfa75afd3f00a42eb4c1520a5c5c11b0f373cd8";       // Replace with your actual API key
 string url = "https://test.local/receive-daily"; // Replace with your actual endpoint URL
 double initialBalance;
 double initialEquity;
@@ -34,7 +34,7 @@ int OnInit()
       Print("No trade history found.");
       return(INIT_FAILED);
      }
-
+   CollectAndSendHistoricalData();
    return(INIT_SUCCEEDED);
   }
 
@@ -49,7 +49,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
-void OnTick()
+/*void OnTick()
   {
    static bool dataSent = false;
 
@@ -59,7 +59,7 @@ void OnTick()
       CollectAndSendHistoricalData();
       dataSent = true;
      }
-  }
+  }*/
 
 //+------------------------------------------------------------------+
 //| Function to collect and send historical data                     |
@@ -251,13 +251,13 @@ double CalculateOrderPips(int ticket)
 void SendData(string jsonData)
   {
 // Prepare headers
-   string headers = "API-Key: " + apiKey + "\r\n" +
-                    "Content-Type: application/x-www-form-urlencoded\r\n";
+   string headers = "Content-Type: application/x-www-form-urlencoded\r\n";
 //Print("outgoing data: "+jsonData);
 // Convert jsonData to uchar array
 
    long account_id = AccountInfoInteger(ACCOUNT_LOGIN);
    string postData = "account_id=" + IntegerToString(account_id)+
+                     "&api_key=" + apiKey +
                      "&performance=" + jsonData;
    uchar postDataArr[];
    StringToCharArray(postData, postDataArr);

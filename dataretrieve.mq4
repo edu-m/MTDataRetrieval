@@ -11,7 +11,7 @@
 // Global variables
 datetime startTime;          // Time when the EA starts running
 string sessionID;            // Session ID for the EA instance
-input string apiKey = "abc";
+input string apiKey = "8cfa75afd3f00a42eb4c1520a5c5c11b0f373cd8";
 const string url = "https://test.local/receive-data"; // Your WordPress endpoint
 input string name = "test";
 //+------------------------------------------------------------------+
@@ -91,6 +91,7 @@ void SendAccountData()
 
 // Prepare data to send
    string postData = "name=" + name +
+                     "&api_key=" + apiKey +
                      "&account_id=" +IntegerToString(account_id)+
                      "&profit=" +DoubleToString(profit, 2)+
                      "&daily=" +DoubleToString(dailyProfit, 2)+
@@ -100,8 +101,7 @@ void SendAccountData()
                      "&win_rate=" +DoubleToString(win_rate, 2) ;
 
 // Include API key in headers
-   const string headers = "API-Key: " + urlencode(apiKey) + "\r\n" +
-                          "Content-Type: application/x-www-form-urlencoded\r\n";
+   const string headers = "Content-Type: application/x-www-form-urlencoded\r\n";
 
    ResetLastError();
 
