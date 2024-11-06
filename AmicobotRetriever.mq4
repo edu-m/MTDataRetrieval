@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Eduardo Meli"
 #property link      "https://amicobot.it"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 #define OP_BALANCE 6
 #define OP_CREDIT 7
@@ -14,7 +14,7 @@ string sessionID;            // Session ID for the EA instance
 input string apiKey = ""; // Your API Key
 const string dataUrl = "https://amicobot.it/receive-data"; // Your WordPress endpoint
 const string dailyUrl = "https://amicobot.it/receive-daily"; // Your WordPress endpoint
-input string name = "test"; // Name of your account
+input string name = ""; // Name of your account
 
 
 
@@ -81,7 +81,7 @@ double initialEquity = GetInitialBalance();
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   EventSetTimer(5);
+   EventSetTimer(10);
    Print("Succesfully started");
    SendAccountData();
    return(INIT_SUCCEEDED);
@@ -100,9 +100,9 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTimer()
   {
-   SendAccountData();
-   Sleep(2000);
    CollectAndSendHistoricalData();
+   Sleep(2000);
+   SendAccountData();
   }
 
 //+------------------------------------------------------------------+
@@ -117,8 +117,8 @@ double realizedPL()
    for(int i = 0; i < totalOrders; i++)
      {
       if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY))
-     {
-      if(OrderCloseTime() > 0 && OrderType() < 3)
+        {
+         if(OrderCloseTime() > 0 && OrderType() < 3)
             totalProfit += OrderProfit() + OrderSwap() + OrderCommission();
         }
      }
@@ -133,7 +133,7 @@ void SendAccountData()
    if(name == "")
      {
       Alert("No name has been specified. Aborting");
-      return;
+      ExpertRemove();
      }
 // Collect account data
    long account_id = AccountInfoInteger(ACCOUNT_LOGIN);
@@ -178,6 +178,11 @@ void SendAccountData()
          Print("Possible cause: URL not listed in allowed URLs.");
          Print("Please add it in Tools > Options > Expert Advisors.");
         }
+      if(error == 5203)
+        {
+         Print("WebRequest failure. Check for firewall settings or compatibility issues with your system.");
+        }
+      ExpertRemove();
      }
    else
      {
